@@ -1,0 +1,65 @@
+#define BLYNK_TEMPLATE_ID           "TMPL3mLeanv2l"
+#define BLYNK_TEMPLATE_NAME         "Quickstart Device"
+#define BLYNK_AUTH_TOKEN            "4svW5sw3X9ZWCYnplTouzcozJRf6MoVj"
+
+/* Comment this out to disable prints and save space */
+#define BLYNK_PRINT Serial
+
+
+#include <ESP8266WiFi.h>
+#include <BlynkSimpleEsp8266.h>
+
+// Your WiFi credentials.
+
+#include "DHT.h"
+#define DPIN 4       
+#define DTYPE DHT11   
+DHT dht(DPIN,DTYPE);
+
+char auth[] = BLYNK_AUTH_TOKEN;
+char ssid[] = "Mi 10i";
+char pass[] = "12345678";
+
+SimpleTimer timer;
+
+void setup()
+{
+  pinMode(D3,OUTPUT);
+Serial.begin(9600);
+dht.begin();
+Blynk.begin(auth, ssid, pass);
+}
+void loop()
+{
+Blynk.run();
+timer.run();
+int sensor=0;
+int output=0;
+float tc = dht.readTemperature(false); 
+float tf = dht.readTemperature(true);  
+float hu = dht.readHumidity();          
+sensor=analogRead(A0);
+output=(145-map(sensor,0,1023,0,100));
+Serial.println("Moisture= ");
+Serial.println(output);
+Serial.print("Temp: ");
+Serial.print(tc);
+Serial.print(" C, ");
+Serial.print(tf);
+Serial.print(" F, Hum: ");
+Serial.print(hu);
+Serial.println("%");
+Blynk.virtualWrite(V4,output);
+Blynk.virtualWrite(V5,tc);
+Blynk.virtualWrite(V6,hu);
+
+if (output>70)
+{ 
+  digitalWrite(D3,LOW);
+}
+else
+{
+  digitalWrite(D3,HIGH);
+}
+delay(1000);
+}
